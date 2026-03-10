@@ -1,0 +1,13 @@
+{
+  "name": "criccast-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "fastify": "^4.26.2",
+    "socket.io": "^4.7.5"
+  }
+}

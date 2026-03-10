@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/criccast
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run dev
+
+  gfx-engine:
+    build:
+      context: ./gfx-engine
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173" # Vite default port
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3000
+      - VITE_WS_URL=ws://localhost:3000
+    volumes:
+      - ./gfx-engine:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run dev
+    depends_on:
+      - backend
+
+  scorer-app:
+    build:
+      context: ./scorer-app
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"   # Expo web dev server
+      - "19000:19000" # Expo Go API port
+      - "19001:19001" # Expo Metro bundler
+      - "19002:19002" # Expo DevTools
+    environment:
+      - NODE_ENV=development
+      - EXPO_PUBLIC_API_URL=http://localhost:3000
+      - EXPO_PUBLIC_WS_URL=ws://localhost:3000
+      - CHOKIDAR_USEPOLLING=true # Helps with hot-reloading in Docker
+    volumes:
+      - ./scorer-app:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm start -- --web # Starts expo for web testing
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=criccast
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:
