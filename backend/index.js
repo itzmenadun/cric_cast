@@ -10,9 +10,10 @@ fastify.register(cors, { origin: '*' })
 fastify.register(require('./routes/tournaments'))
 fastify.register(require('./routes/teams'))
 fastify.register(require('./routes/players'))
-fastify.register(require('./routes/matches'))
-fastify.register(require('./routes/scoring'))
-fastify.register(require('./routes/gfx'))
+fastify.register(require('./routes/matches'), { prefix: '/api/matches' })
+fastify.register(require('./routes/scoring'), { prefix: '/api/scoring' })
+fastify.register(require('./routes/gfx'), { prefix: '/api/gfx' })
+fastify.register(require('./routes/vmix'), { prefix: '/api/vmix' })
 
 // ─── Health Check ────────────────────────────────────────
 fastify.get('/', async () => ({ status: 'ok', service: 'criccast-backend' }))

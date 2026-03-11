@@ -29,17 +29,18 @@ Based on the PRD, Design Documentation, and Tech Stack, this is the 12-week road
 - [x] Build in/out transition logic and value interpolation (e.g., rolling numbers).
 
 ## Phase 4: Advanced GFX, vMix Integration & Scoring Polish (Weeks 10-11)
-- [ ] Develop **Full Screens & Squeeze Backs** (Toss, Playing XI, Batting/Bowling Scorecards, Points Table).
-- [ ] Develop **Event-Triggered Popups** (Milestones: 50, 100, Wickets).
-- [ ] Add advanced tracking to Scorer interface (Wagon Wheel & Pitch Map UI).
-- [ ] Set up dedicated JSON/XML endpoints for vMix data sources.
-- [ ] Integrate vMix Web Controller API to trigger specific animations automatically.
-- [ ] Create downloadable `.gtzip` templates mapped to the SaaS data fields.
+- [x] Develop **Full Screens & Squeeze Backs** (Toss, Playing XI, Batting/Bowling Scorecards, Points Table).
+- [x] Develop **Event-Triggered Popups** (Milestones: 50, 100, Wickets).
+- [x] Integrate **React Router** to expose unique `/match/:matchId` URLs for isolated vMix Browser Inputs.
+- [x] Add advanced tracking to Scorer interface (Wagon Wheel & Pitch Map UI).
+- [x] Set up dedicated JSON/XML endpoints for vMix data sources.
+- [x] Integrate vMix Web Controller API to trigger specific animations automatically.
+- [x] Create downloadable `.gtzip` templates mapped to the SaaS data fields.
 
 ## Phase 5: Testing, Optimization & Launch (Week 12)
-- [ ] Conduct end-to-end latency optimization to ensure < 500ms delay.
-- [ ] Perform offline resilience and state recovery testing.
-- [ ] Test system crash recovery (Stateless WebSockets reconnect).
-- [ ] Deploy GFX App to Vercel/Cloudflare Pages.
-- [ ] Final UI/UX review of animations, safe areas, and typography.
-- [ ] Production Launch.
+- [x] Conduct end-to-end latency optimization to ensure < 500ms delay.
+- [x] Perform offline resilience and state recovery testing.
+- [x] Test system crash recovery (Stateless WebSockets reconnect).
+- [x] Deploy GFX App to Vercel/Cloudflare Pages.
+- [x] Final UI/UX review of animations, safe areas, and typography.
+- [x] Production Launch.

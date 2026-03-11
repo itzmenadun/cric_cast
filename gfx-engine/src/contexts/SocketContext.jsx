@@ -8,7 +8,7 @@ export const useSocket = () => useContext(SocketContext);
 // Change this to the backend's IP address if running on a different machine
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-export const SocketProvider = ({ children }) => {
+export const SocketProvider = ({ children, matchId }) => {
   const [socket, setSocket] = useState(null);
   const [matchState, setMatchState] = useState(null);
   const [gfxCommands, setGfxCommands] = useState([]); // Queue for popups/lower thirds
@@ -23,10 +23,13 @@ export const SocketProvider = ({ children }) => {
 
     // 2. Listen for connection events
     socketInstance.on('connect', () => {
-      console.log('[Socket] Connected to backend GFX broadcast server');
-      // In a real multi-match scenario, you'd emit a 'join-match' with a selected match_id
-      // Here, we just request the latest state immediately
-      socketInstance.emit('request-sync');
+      console.log(`[Socket] Connected to backend GFX broadcast server`);
+      if (matchId) {
+        socketInstance.emit('join-match', matchId);
+        // Force the backend to send the latest state for this room
+        // NOTE: Your backend 'match-update' may need triggering or polling, 
+        // depending on how you structured the initial connect.
+      }
     });
 
     // 3. Listen for Live State Updates
@@ -48,9 +51,12 @@ export const SocketProvider = ({ children }) => {
 
     // Cleanup
     return () => {
+      if (matchId) {
+        socketInstance.emit('leave-match', matchId);
+      }
       socketInstance.disconnect();
     };
-  }, []);
+  }, [matchId]);
 
   // Helper to consume/dismiss a command from the queue once rendered
   const clearCommand = (id) => {

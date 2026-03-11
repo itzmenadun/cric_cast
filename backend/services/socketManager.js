@@ -41,9 +41,9 @@ function broadcastMatchUpdate(matchId, data) {
   io.to(`match:${matchId}`).emit('match-update', data)
 }
 
-function broadcastGfxCommand(matchId, command, payload) {
+function broadcastGfxCommand(matchId, payload) {
   if (!io) return
-  io.to(`match:${matchId}`).emit('gfx-command', { command, ...payload })
+  io.to(`match:${matchId}`).emit('gfx-command', payload)
 }
 
 module.exports = { initSocket, getIO, broadcastMatchUpdate, broadcastGfxCommand }

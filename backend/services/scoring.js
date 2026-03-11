@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
 const { setMatchState, buildMatchState } = require('./matchState')
-const { broadcastMatchUpdate } = require('./socketManager')
+const { broadcastMatchUpdate, broadcastGfxCommand } = require('./socketManager')
+const crypto = require('crypto')
 
 const prisma = new PrismaClient()
 
@@ -17,6 +18,8 @@ async function processBall(data) {
     wagonX = null, wagonY = null, pitchZone = null,
     idempotencyKey
   } = data
+
+  let milestoneTrigger = null;
 
   // ── Idempotency check ──
   const existing = await prisma.ball.findUnique({ where: { idempotencyKey } })
@@ -82,6 +85,15 @@ async function processBall(data) {
       data: { strikeRate: newSR }
     })
 
+    // ── Milestone Detection (50s, 100s) ──
+    // Compare the old runs (before this ball) to the new runs to see if a boundary was crossed
+    const previousRuns = updatedBatsman.runs - runsScored
+    if (previousRuns < 50 && updatedBatsman.runs >= 50 && updatedBatsman.runs < 100) {
+      milestoneTrigger = { type: 'show-milestone', milestone: '50 Runs', player: updatedBatsman, stats: { runs: updatedBatsman.runs, balls: updatedBatsman.ballsFaced, sr: newSR } }
+    } else if (previousRuns < 100 && updatedBatsman.runs >= 100) {
+      milestoneTrigger = { type: 'show-milestone', milestone: '100 Runs', player: updatedBatsman, stats: { runs: updatedBatsman.runs, balls: updatedBatsman.ballsFaced, sr: newSR } }
+    }
+
     // 5. Handle wicket: mark batsman as OUT
     if (isWicket && dismissedPlayerId) {
       await tx.batsmanInnings.update({
@@ -124,6 +136,25 @@ async function processBall(data) {
 
   // ── Update Redis cache & broadcast ──
   await refreshAndBroadcast(matchId, inningsId)
+
+  // ── Emit Milestone GFX Command if triggered ──
+  if (milestoneTrigger) {
+    const playerDetails = await prisma.player.findUnique({ where: { id: batsmanId } })
+    broadcastGfxCommand(matchId, {
+      id: crypto.randomUUID(),
+      type: milestoneTrigger.type,
+      duration: 8000,
+      data: {
+        title: milestoneTrigger.milestone,
+        name: playerDetails.name,
+        stats: [
+          { label: 'Runs', value: milestoneTrigger.stats.runs },
+          { label: 'Balls', value: milestoneTrigger.stats.balls },
+          { label: 'SR', value: milestoneTrigger.stats.sr }
+        ]
+      }
+    })
+  }
 
   return { duplicate: false, ball: result }
 }
