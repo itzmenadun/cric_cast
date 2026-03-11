@@ -81,7 +81,7 @@ Based on the PRD, Design Documentation, and Tech Stack, this is the 12-week road
 
 ### 7.1 Platform & Infrastructure
 - [ ] Migrate backend to container orchestration (Kubernetes or managed ECS) with horizontal pod autoscaling based on CPU/WebSocket connection count.
-- [ ] Introduce environment-specific configs (dev/stage/prod) with strict parity and automated DB migrations.
+- [x] Introduce environment-specific configs (dev/stage/prod) with strict parity and automated DB migrations.
 - [ ] Add centralized logging and monitoring stack (e.g., OpenTelemetry + Prometheus + Grafana/Sentry) with dashboards for API latency, WebSocket health, and match throughput.
 - [ ] Implement rate limiting and IP throttling at the edge (API gateway/reverse proxy) to protect from accidental or malicious overload.
 

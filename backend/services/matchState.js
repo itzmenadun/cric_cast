@@ -1,9 +1,38 @@
 const Redis = require('ioredis')
+const config = require('../config')
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+class InMemoryStore {
+  constructor() {
+    this.store = new Map()
+  }
 
-redis.on('connect', () => console.log('[Redis] Connected'))
-redis.on('error', (err) => console.error('[Redis] Error:', err.message))
+  async set(key, value) {
+    this.store.set(key, value)
+  }
+
+  async get(key) {
+    return this.store.has(key) ? this.store.get(key) : null
+  }
+
+  async del(key) {
+    this.store.delete(key)
+  }
+
+  on() {
+    // no-op for compatibility
+  }
+
+  quit() {
+    // no-op
+  }
+}
+
+const redis = config.isTest ? new InMemoryStore() : new Redis(config.redisUrl)
+
+if (!config.isTest) {
+  redis.on('connect', () => console.log('[Redis] Connected'))
+  redis.on('error', (err) => console.error('[Redis] Error:', err.message))
+}
 
 /**
  * Build and cache the live match state in Redis for sub-500ms delivery.
