@@ -6,7 +6,11 @@ COPY package*.json ./
 
 RUN npm install
 
+RUN npx prisma generate || true
+
 COPY . .
+
+RUN npx prisma generate
 
 EXPOSE 3000
 
