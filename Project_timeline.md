@@ -22,11 +22,11 @@ Based on the PRD, Design Documentation, and Tech Stack, this is the 12-week road
 
 ## Phase 3: GFX Rendering Engine Core (React.js) (Weeks 7-9)
 - [x] Initialize React.js (Vite) project tailored for a 1920x1080 transparent canvas.
-- [ ] Integrate Framer Motion for physics-based animations and transitions.
-- [ ] Connect WebSocket client to receive live JSON payloads from the backend.
-- [ ] Develop **Scorebug** component (Always-On Graphic).
-- [ ] Develop **Lower Thirds** components (Player IDs, Stats).
-- [ ] Build in/out transition logic and value interpolation (e.g., rolling numbers).
+- [x] Integrate Framer Motion for physics-based animations and transitions.
+- [x] Connect WebSocket client to receive live JSON payloads from the backend.
+- [x] Develop **Scorebug** component (Always-On Graphic).
+- [x] Develop **Lower Thirds** components (Player IDs, Stats).
+- [x] Build in/out transition logic and value interpolation (e.g., rolling numbers).
 
 ## Phase 4: Advanced GFX, vMix Integration & Scoring Polish (Weeks 10-11)
 - [ ] Develop **Full Screens & Squeeze Backs** (Toss, Playing XI, Batting/Bowling Scorecards, Points Table).
