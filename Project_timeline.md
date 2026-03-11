@@ -1,3 +1,4 @@
+
 # Project Timeline & Todo List: CricCast SaaS
 
 Based on the PRD, Design Documentation, and Tech Stack, this is the 12-week roadmap from concept to live production.
@@ -76,3 +77,49 @@ Based on the PRD, Design Documentation, and Tech Stack, this is the 12-week road
 - [x] Added `startBowlerOver(bowlerId)` — calls backend to open a new over row, updates `currentOverId`.
 - [x] Added `startSecondInnings({ battingTeamId, bowlingTeamId, target })` — called from InningsBreakScreen.
 
+## Phase 7: v3.0 Scale-Up Foundation (Weeks 16-19)
+
+### 7.1 Platform & Infrastructure
+- [ ] Migrate backend to container orchestration (Kubernetes or managed ECS) with horizontal pod autoscaling based on CPU/WebSocket connection count.
+- [ ] Introduce environment-specific configs (dev/stage/prod) with strict parity and automated DB migrations.
+- [ ] Add centralized logging and monitoring stack (e.g., OpenTelemetry + Prometheus + Grafana/Sentry) with dashboards for API latency, WebSocket health, and match throughput.
+- [ ] Implement rate limiting and IP throttling at the edge (API gateway/reverse proxy) to protect from accidental or malicious overload.
+
+### 7.2 Multi-Tenancy & Account Model
+- [ ] Design and implement a multi-tenant data model (Leagues/Organizations/Teams/Users) with row-level scoping by `tenantId`.
+- [ ] Add Role-Based Access Control (RBAC) roles (Owner, Admin, Scorer, Analyst) with permissions enforced at the API layer.
+- [ ] Implement organization/workspace switching in the scorer app and future web admin portal.
+- [ ] Add audit logging for sensitive actions (match edits, player data changes, tournament configuration).
+
+---
+
+## Phase 8: v3.0 Productization & Admin Surfaces (Weeks 20-22)
+
+### 8.1 Web Admin Console (Future `admin-app`)
+- [ ] Design a responsive web console for league admins (Create/Manage tournaments, manage scorers, configure branding and overlays).
+- [ ] Implement organization-level branding: logos, color palettes, default lower-third templates.
+- [ ] Add match scheduling calendar with filters by venue, tournament, and broadcast status.
+
+---
+
+## Phase 9: v3.0 Reliability, Performance & Analytics (Weeks 23-24)
+
+### 9.1 Reliability & Performance
+- [ ] Establish SLOs for uptime (e.g., 99.5%) and latency budgets (p95 `< 400ms` scorer → GFX update).
+- [ ] Implement health checks and graceful degradation (e.g., fall back to polling if WebSocket fails).
+- [ ] Add chaos testing scenarios for Redis/postgres outages and automatic recovery of match state.
+- [ ] Introduce canary or blue/green deployments for backend and GFX engine.
+
+### 9.2 Observability & Product Analytics
+- [ ] Instrument scorer and GFX apps with event analytics (time per ball entry, dropped connections, reconnection success rate).
+- [ ] Build internal dashboards for live tournaments: list of active matches, health indicators, last ball timestamp.
+- [ ] Add anonymized error reports for scoring mismatches (e.g., impossible states) with one-click export for support.
+
+---
+
+## Phase 10: Future v3.x Enhancements (Beyond Week 24)
+
+- [ ] White-label theming per league, including GFX layout presets.
+- [ ] Public read-only APIs or web widgets for live scorecards and tournament tables.
+- [ ] Deeper analytics modules (player form graphs, wagon wheel heatmaps across tournaments).
+- [ ] Experimental automation: semi-automatic scoring helpers powered by vision/ML (long-term R&D).

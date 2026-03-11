@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
+import Toast from 'react-native-toast-message';
 
 // Context
 import { MatchProvider } from './src/context/MatchContext';
@@ -34,91 +35,94 @@ const NAV_HEADER_STYLE = {
 
 export default function App() {
   return (
-    <MatchProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Dashboard" screenOptions={NAV_HEADER_STYLE}>
+    <>
+      <MatchProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="Dashboard" screenOptions={NAV_HEADER_STYLE}>
 
-          {/* ── Home ── */}
-          <Stack.Screen
-            name="Dashboard"
-            component={DashboardScreen}
-            options={{ title: 'CricCast 🏏', headerShown: false }}
-          />
+            {/* ── Home ── */}
+            <Stack.Screen
+              name="Dashboard"
+              component={DashboardScreen}
+              options={{ title: 'CricCast 🏏', headerShown: false }}
+            />
 
-          {/* ── Browsing ── */}
-          <Stack.Screen
-            name="Tournaments"
-            component={TournamentsScreen}
-            options={{ title: 'Tournaments' }}
-          />
-          <Stack.Screen
-            name="Matches"
-            component={MatchesScreen}
-            // title set dynamically inside MatchesScreen
-          />
+            {/* ── Browsing ── */}
+            <Stack.Screen
+              name="Tournaments"
+              component={TournamentsScreen}
+              options={{ title: 'Tournaments' }}
+            />
+            <Stack.Screen
+              name="Matches"
+              component={MatchesScreen}
+              // title set dynamically inside MatchesScreen
+            />
 
-          {/* ── Match Flow ── */}
-          <Stack.Screen
-            name="PreMatchSetup"
-            component={PreMatchSetupScreen}
-            options={{ title: 'Pre-Match Setup' }}
-          />
-          <Stack.Screen
-            name="ScoringDashboard"
-            component={ScoringDashboardScreen}
-            options={{ title: 'Live Scoring Engine', headerBackVisible: false }}
-          />
-          <Stack.Screen
-            name="InningsBreak"
-            component={InningsBreakScreen}
-            options={{ title: 'Innings Break', headerBackVisible: false }}
-          />
-          <Stack.Screen
-            name="MatchSummary"
-            component={MatchSummaryScreen}
-            options={{ title: 'Match Summary', headerBackVisible: false }}
-          />
+            {/* ── Match Flow ── */}
+            <Stack.Screen
+              name="PreMatchSetup"
+              component={PreMatchSetupScreen}
+              options={{ title: 'Pre-Match Setup' }}
+            />
+            <Stack.Screen
+              name="ScoringDashboard"
+              component={ScoringDashboardScreen}
+              options={{ title: 'Live Scoring Engine', headerBackVisible: false }}
+            />
+            <Stack.Screen
+              name="InningsBreak"
+              component={InningsBreakScreen}
+              options={{ title: 'Innings Break', headerBackVisible: false }}
+            />
+            <Stack.Screen
+              name="MatchSummary"
+              component={MatchSummaryScreen}
+              options={{ title: 'Match Summary', headerBackVisible: false }}
+            />
 
-          {/* ── Management ── */}
-          <Stack.Screen
-            name="CreateTournament"
-            component={CreateTournamentScreen}
-            options={{ title: 'New Tournament' }}
-          />
-          <Stack.Screen
-            name="CreateTeam"
-            component={CreateTeamScreen}
-            options={{ title: 'New Team' }}
-          />
-          <Stack.Screen
-            name="AddPlayer"
-            component={AddPlayerScreen}
-            options={{ title: 'Add Players' }}
-          />
-          <Stack.Screen
-            name="CreateMatch"
-            component={CreateMatchScreen}
-            options={{ title: 'New Match' }}
-          />
-          <Stack.Screen
-            name="EditTournament"
-            component={EditTournamentScreen}
-            options={{ title: 'Edit Tournament' }}
-          />
-          <Stack.Screen
-            name="EditMatch"
-            component={EditMatchScreen}
-            options={{ title: 'Edit Match' }}
-          />
-          <Stack.Screen
-            name="TeamsList"
-            component={TeamsListScreen}
-            options={{ title: 'All Teams' }}
-          />
+            {/* ── Management ── */}
+            <Stack.Screen
+              name="CreateTournament"
+              component={CreateTournamentScreen}
+              options={{ title: 'New Tournament' }}
+            />
+            <Stack.Screen
+              name="CreateTeam"
+              component={CreateTeamScreen}
+              options={{ title: 'New Team' }}
+            />
+            <Stack.Screen
+              name="AddPlayer"
+              component={AddPlayerScreen}
+              options={{ title: 'Add Players' }}
+            />
+            <Stack.Screen
+              name="CreateMatch"
+              component={CreateMatchScreen}
+              options={{ title: 'New Match' }}
+            />
+            <Stack.Screen
+              name="EditTournament"
+              component={EditTournamentScreen}
+              options={{ title: 'Edit Tournament' }}
+            />
+            <Stack.Screen
+              name="EditMatch"
+              component={EditMatchScreen}
+              options={{ title: 'Edit Match' }}
+            />
+            <Stack.Screen
+              name="TeamsList"
+              component={TeamsListScreen}
+              options={{ title: 'All Teams' }}
+            />
 
-        </Stack.Navigator>
-        <StatusBar style="light" />
-      </NavigationContainer>
-    </MatchProvider>
+          </Stack.Navigator>
+          <StatusBar style="light" />
+        </NavigationContainer>
+      </MatchProvider>
+      <Toast />
+    </>
   );
 }

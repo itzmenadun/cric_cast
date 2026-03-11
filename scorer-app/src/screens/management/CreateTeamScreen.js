@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { api } from '../../services/api';
 
 const PRESET_COLORS = ['#005EB8', '#DC2626', '#16A34A', '#D97706', '#7C3AED', '#0F172A', '#0E7490', '#BE185D'];
@@ -11,17 +12,18 @@ export default function CreateTeamScreen({ navigation }) {
   const [loading, setLoading]   = useState(false);
 
   const submit = async () => {
-    if (!name.trim()) return Alert.alert('Validation', 'Team name is required.');
-    if (!shortName.trim() || shortName.length > 4) return Alert.alert('Validation', 'Short name required (max 4 chars).');
+    if (!name.trim()) return Toast.show({ type: 'error', text1: 'Validation', text2: 'Team name is required.' });
+    if (!shortName.trim() || shortName.length > 4) return Toast.show({ type: 'error', text1: 'Validation', text2: 'Short name required (max 4 chars).' });
     setLoading(true);
     try {
       const { data: team } = await api.post('/api/teams', { name: name.trim(), shortName: shortName.trim().toUpperCase(), color });
-      Alert.alert('Success', `${team.name} created!`, [
-        { text: 'Add Players', onPress: () => navigation.replace('AddPlayer', { teamId: team.id, teamName: team.name }) },
-        { text: 'Done', onPress: () => navigation.goBack() },
+      Toast.show({ type: 'success', text1: 'Success', text2: `${team.name} created!` });
+      Alert.alert('Add Players', `Do you want to add players to ${team.name} now?`, [
+        { text: 'Yes', onPress: () => navigation.replace('AddPlayer', { teamId: team.id, teamName: team.name }) },
+        { text: 'Later', onPress: () => navigation.goBack() },
       ]);
     } catch (e) {
-      Alert.alert('Error', e?.response?.data?.message || 'Failed to create team.');
+      Toast.show({ type: 'error', text1: 'Error', text2: e?.response?.data?.message || 'Failed to create team.' });
     } finally {
       setLoading(false);
     }

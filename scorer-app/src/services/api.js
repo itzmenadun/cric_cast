@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 // To connect to a local backend from an Android emulator, you typically use 10.0.2.2.
 // From an iOS simulator, localhost works. 
 // For a physical device on the same local network, you need the host machine's local IP address (e.g., 192.168.1.x:3000).
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.183.145.117:3000';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -19,7 +19,13 @@ function showErrorToast(title, message) {
   const now = Date.now();
   if (now - lastToastTime < TOAST_COOLDOWN) return; // throttle
   lastToastTime = now;
-  Alert.alert(title, message);
+  Toast.show({
+    type: 'error',
+    text1: title,
+    text2: message,
+    position: 'top',
+    visibilityTime: 4000,
+  });
 }
 
 // ─── Response interceptor ──────────────────────────────────
@@ -34,7 +40,7 @@ api.interceptors.response.use(
       showErrorToast('Server Error', `Something went wrong on the server (${error.response.status}). Please try again.`);
     }
     // Always log for debugging
-    console.error('[API Error]', error?.response?.status, error?.response?.data || error.message);
+    console.warn('[API Error]', error?.response?.status, error?.response?.data || error.message);
     return Promise.reject(error);
   }
 );

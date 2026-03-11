@@ -86,3 +86,25 @@ The rendering engine relies on a strictly typed JSON payload to ensure the graph
   "active_graphic": "SCOREBUG"
 }
 ```
+
+## 6. v3.0 Architecture for Scale
+
+### 6.1 Multi-Tier, Multi-Tenant Backend
+- The scoring backend exposes a **multi-tenant API** where all match, tournament, and graphics data is scoped by `tenantId` (league/organization).
+- A dedicated **Match State Service** manages active matches in memory/Redis, decoupled from the persistence layer to support high write throughput.
+- Read-heavy endpoints (public scorecards, vMix JSON feeds) are served via cached projections to protect the primary OLTP database.
+
+### 6.2 WebSocket Fan-Out Strategy
+- Scorer and GFX clients connect via Socket.io to region-local WebSocket gateways.
+- Gateways publish updates to a message bus (e.g., Redis Pub/Sub or a managed streaming service), which fan out to all subscribers for a given `matchId`.
+- Connection lifecycle (join/leave, reconnects) is tracked to provide real-time visibility into active production sessions.
+
+### 6.3 Reliability & Failure Recovery
+- Match state snapshots are periodically persisted (e.g., every N balls or on over completion) so GFX and scorers can reconstruct state after crashes.
+- On reconnect, clients request the authoritative match snapshot plus a compact event log (missed deliveries) to reconcile any divergence.
+- Deployments follow canary/blue-green patterns to ensure zero-downtime releases for live tournaments.
+
+### 6.4 Security & Governance
+- All WebSocket and HTTP traffic is authenticated using short-lived tokens, with per-tenant RBAC enforced in the backend.
+- Sensitive operations (score edits, result overrides) emit audit events that are stored separately from hot match data.
+- vMix/browser URLs include signed tokens with expiry and limited scopes (read-only, specific match, specific tenant).

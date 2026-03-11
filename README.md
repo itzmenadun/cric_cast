@@ -24,6 +24,18 @@ The ecosystem consists of three interconnected services, all communicating seaml
 
 ---
 
+## 📦 v3.0 Scale-Up Overview
+
+The v3.0 release focuses on evolving CricCast from a single-production tool into a **multi-tenant, production-grade SaaS**:
+
+- **Multi-tenancy & RBAC:** Isolated workspaces for leagues/organizations with role-based access (Owner, Admin, Scorer, Analyst).
+- **Scalability:** Architecture and infrastructure designed to handle 100+ concurrent live matches and hundreds of scorer/GFX clients.
+- **Reliability & Observability:** First-class monitoring, alerting, and audit logging to support professional broadcast operations.
+
+See `PRD.md`, `Design_Documentation.md`, and `Project_timeline.md` for the detailed v3.0 requirements, architecture, and roadmap.
+
+---
+
 ## 🚀 Getting Started
 
 Ensure you have Node.js (v20+), Docker, and Expo CLI installed on your machine.

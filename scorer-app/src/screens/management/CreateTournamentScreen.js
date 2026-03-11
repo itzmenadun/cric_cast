@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import Toast from 'react-native-toast-message';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { api } from '../../services/api';
 
 const FORMATS = ['T10', 'T20', 'ODI', 'TEST', 'CUSTOM'];
@@ -9,8 +11,10 @@ export default function CreateTournamentScreen({ navigation }) {
   const [name, setName]           = useState('');
   const [format, setFormat]       = useState('T20');
   const [overs, setOvers]         = useState('20');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate]     = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate]     = useState(null);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
   const [loading, setLoading]     = useState(false);
 
   const selectFormat = (f) => {
@@ -19,20 +23,21 @@ export default function CreateTournamentScreen({ navigation }) {
   };
 
   const submit = async () => {
-    if (!name.trim()) return Alert.alert('Validation', 'Tournament name is required.');
-    if (!overs || isNaN(Number(overs))) return Alert.alert('Validation', 'Enter a valid overs number.');
+    if (!name.trim()) return Toast.show({ type: 'error', text1: 'Validation', text2: 'Tournament name is required.' });
+    if (!overs || isNaN(Number(overs))) return Toast.show({ type: 'error', text1: 'Validation', text2: 'Enter a valid overs number.' });
     setLoading(true);
     try {
       await api.post('/api/tournaments', {
         name: name.trim(),
         format,
         oversPerInnings: Number(overs),
-        startDate: startDate || undefined,
-        endDate: endDate || undefined,
+        startDate: startDate ? startDate.toISOString() : undefined,
+        endDate: endDate ? endDate.toISOString() : undefined,
       });
-      Alert.alert('Success', `"${name}" created!`, [{ text: 'OK', onPress: () => navigation.goBack() }]);
+      Toast.show({ type: 'success', text1: 'Success', text2: `"${name}" created!` });
+      navigation.goBack();
     } catch (e) {
-      Alert.alert('Error', e?.response?.data?.message || 'Failed to create tournament.');
+      Toast.show({ type: 'error', text1: 'Error', text2: e?.response?.data?.message || 'Failed to create tournament.' });
     } finally {
       setLoading(false);
     }
@@ -74,23 +79,63 @@ export default function CreateTournamentScreen({ navigation }) {
           keyboardType="number-pad"
         />
 
-        <Text style={styles.label}>Start Date (YYYY-MM-DD)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="2026-04-01"
-          placeholderTextColor="#94A3B8"
-          value={startDate}
-          onChangeText={setStartDate}
-        />
+        <Text style={styles.label}>Start Date</Text>
+        {Platform.OS === 'web' ? (
+          <input
+            type="date"
+            style={{ width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '15px', color: '#1E293B', backgroundColor: '#FFF' }}
+            value={startDate ? startDate.toISOString().split('T')[0] : ''}
+            onChange={(e) => setStartDate(e.target.value ? new Date(e.target.value) : null)}
+          />
+        ) : (
+          <>
+            <TouchableOpacity style={styles.input} onPress={() => setShowStartPicker(true)}>
+              <Text style={{ color: startDate ? '#1E293B' : '#94A3B8' }}>
+                {startDate ? startDate.toISOString().split('T')[0] : 'Select Date'}
+              </Text>
+            </TouchableOpacity>
+            {showStartPicker && (
+              <DateTimePicker
+                value={startDate || new Date()}
+                mode="date"
+                display="default"
+                onChange={(event, date) => {
+                  setShowStartPicker(false);
+                  if (date) setStartDate(date);
+                }}
+              />
+            )}
+          </>
+        )}
 
-        <Text style={styles.label}>End Date (YYYY-MM-DD)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="2026-04-21"
-          placeholderTextColor="#94A3B8"
-          value={endDate}
-          onChangeText={setEndDate}
-        />
+        <Text style={styles.label}>End Date</Text>
+        {Platform.OS === 'web' ? (
+          <input
+            type="date"
+            style={{ width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '15px', color: '#1E293B', backgroundColor: '#FFF' }}
+            value={endDate ? endDate.toISOString().split('T')[0] : ''}
+            onChange={(e) => setEndDate(e.target.value ? new Date(e.target.value) : null)}
+          />
+        ) : (
+          <>
+            <TouchableOpacity style={styles.input} onPress={() => setShowEndPicker(true)}>
+              <Text style={{ color: endDate ? '#1E293B' : '#94A3B8' }}>
+                {endDate ? endDate.toISOString().split('T')[0] : 'Select Date'}
+              </Text>
+            </TouchableOpacity>
+            {showEndPicker && (
+              <DateTimePicker
+                value={endDate || new Date()}
+                mode="date"
+                display="default"
+                onChange={(event, date) => {
+                  setShowEndPicker(false);
+                  if (date) setEndDate(date);
+                }}
+              />
+            )}
+          </>
+        )}
 
       </ScrollView>
 

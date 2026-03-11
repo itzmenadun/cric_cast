@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import Toast from 'react-native-toast-message';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { api } from '../../services/api';
 
 export default function CreateMatchScreen({ navigation }) {
@@ -9,7 +11,8 @@ export default function CreateMatchScreen({ navigation }) {
   const [homeTeam, setHomeTeam]       = useState(null);
   const [awayTeam, setAwayTeam]       = useState(null);
   const [venue, setVenue]             = useState('');
-  const [matchDate, setMatchDate]     = useState('');
+  const [matchDate, setMatchDate]     = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading]         = useState(true);
   const [saving, setSaving]           = useState(false);
 
@@ -24,9 +27,9 @@ export default function CreateMatchScreen({ navigation }) {
   }, []);
 
   const submit = async () => {
-    if (!selectedTournament) return Alert.alert('Validation', 'Select a tournament.');
-    if (!homeTeam || !awayTeam) return Alert.alert('Validation', 'Select both teams.');
-    if (homeTeam.id === awayTeam.id) return Alert.alert('Validation', 'Home and away team must be different.');
+    if (!selectedTournament) return Toast.show({ type: 'error', text1: 'Validation', text2: 'Select a tournament.' });
+    if (!homeTeam || !awayTeam) return Toast.show({ type: 'error', text1: 'Validation', text2: 'Select both teams.' });
+    if (homeTeam.id === awayTeam.id) return Toast.show({ type: 'error', text1: 'Validation', text2: 'Home and away team must be different.' });
     setSaving(true);
     try {
       const { data: match } = await api.post('/api/matches', {
@@ -36,14 +39,12 @@ export default function CreateMatchScreen({ navigation }) {
         format: selectedTournament.format,
         oversPerInnings: selectedTournament.oversPerInnings,
         venue: venue.trim() || undefined,
-        matchDate: matchDate || undefined,
+        matchDate: matchDate ? matchDate.toISOString() : undefined,
       });
-      Alert.alert('Match Created!', `${homeTeam.name} vs ${awayTeam.name}`, [
-        { text: 'Setup Match Now', onPress: () => navigation.replace('PreMatchSetup', { matchId: match.id }) },
-        { text: 'Done', onPress: () => navigation.goBack() },
-      ]);
+      Toast.show({ type: 'success', text1: 'Match Created!', text2: `${homeTeam.name} vs ${awayTeam.name}` });
+      navigation.replace('PreMatchSetup', { matchId: match.id });
     } catch (e) {
-      Alert.alert('Error', e?.response?.data?.message || 'Failed to create match.');
+      Toast.show({ type: 'error', text1: 'Error', text2: e?.response?.data?.message || 'Failed to create match.' });
     } finally {
       setSaving(false);
     }
@@ -95,8 +96,34 @@ export default function CreateMatchScreen({ navigation }) {
         <Text style={styles.label}>Venue</Text>
         <TextInput style={styles.input} placeholder="e.g. R. Premadasa Stadium, Colombo" placeholderTextColor="#94A3B8" value={venue} onChangeText={setVenue} />
 
-        <Text style={styles.label}>Match Date (YYYY-MM-DD)</Text>
-        <TextInput style={styles.input} placeholder="2026-04-05" placeholderTextColor="#94A3B8" value={matchDate} onChangeText={setMatchDate} />
+        <Text style={styles.label}>Match Date</Text>
+        {Platform.OS === 'web' ? (
+          <input
+            type="date"
+            style={{ width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '15px' }}
+            value={matchDate ? matchDate.toISOString().split('T')[0] : ''}
+            onChange={(e) => setMatchDate(e.target.value ? new Date(e.target.value) : null)}
+          />
+        ) : (
+          <>
+            <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+              <Text style={{ color: matchDate ? '#1E293B' : '#94A3B8' }}>
+                {matchDate ? matchDate.toISOString().split('T')[0] : 'Select Date'}
+              </Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={matchDate || new Date()}
+                mode="date"
+                display="default"
+                onChange={(event, date) => {
+                  setShowDatePicker(false);
+                  if (date) setMatchDate(date);
+                }}
+              />
+            )}
+          </>
+        )}
 
       </ScrollView>
 

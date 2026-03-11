@@ -241,3 +241,46 @@ Expected:
 - **v3.0 scale-up**: Architectural plans are strong, but require dedicated QA for multi-tenancy, performance, and observability once implemented.
 
 Overall, the system is **feature-complete for a strong MVP** and structurally ready for v3.0, but must invest in **automated testing, load testing, and observability** to confidently support multi-tenant, high-concurrency tournament operations. 
+
+---
+
+## 10. Automated Test Execution (2026-03-11)
+
+### 10.1 Backend (`backend`)
+
+- Command: `npm test`
+- Result:
+  - **Test Suites**: 1 passed / 1 total.
+  - **Tests**: 2 passed / 2 total.
+  - Jest reported lingering asynchronous operations (`did not exit one second after the test run`).
+- Observations:
+  - Multiple `[Redis] Error: getaddrinfo ENOTFOUND redis` messages were logged during the run.
+  - This indicates that Redis was **not running or not reachable** at `redis://localhost:6379` while the tests executed.
+- Impact:
+  - Current unit/integration tests pass logically, but the Redis client remains connected, which keeps the process alive and pollutes logs.
+- Follow-ups:
+  - For accurate, clean runs:
+    - Start Redis (via `docker-compose up` or local Redis) before running tests, **or**
+    - Mock/stub the Redis layer in tests to avoid real network calls.
+  - Add a test-only teardown path that closes the Redis connection after each test run.
+
+### 10.2 Scorer App (`scorer-app`)
+
+- Command attempted: `npm test`
+- Result:
+  - `npm` reported: **Missing script: "test"**.
+- Impact:
+  - There is **no automated test suite** configured for the scorer app at this time.
+- Follow-ups:
+  - Introduce a testing stack (e.g., Jest + React Native Testing Library and/or Detox/E2E) with at least:
+    - Smoke tests for navigation (dashboard, management screens, live scoring).
+    - Component tests for critical scoring UI (ball entry, undo, wicket modals).
+
+### 10.3 GFX Engine (`gfx-engine`)
+
+- No automated tests were executed in this run.
+- Follow-ups:
+  - Add a `test` script and minimal suite (e.g., Jest/RTL) for key components:
+    - Scorebug.
+    - Milestone popups.
+    - Full-screen scorecards.

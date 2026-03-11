@@ -56,6 +56,28 @@ Professional sports graphics usually require dedicated software (like Chyron or 
 - **Offline Resilience:** The scoring app should cache actions locally (via Service Workers/Local Storage) if the internet drops, syncing instantly once restored, to ensure the match state is never lost.
 - **Security:** Token-based authentication for the JSON data feeds so external parties cannot hijack a broadcaster's graphics data.
 
-## 7. Out of Scope for MVP (Future Roadmap)
+## 7. v3.0 Major Release Objectives (Scale-Up)
+
+### 7.1 Business & Product Goals
+- **Multi-tenant SaaS:** Support multiple leagues/organizations, each with isolated data, branding, and user roles.
+- **Production-grade reliability:** Target at least 99.5% uptime during tournament windows with graceful degradation for non-critical features.
+- **Operational visibility:** Provide live fleet health views (active matches, scorer connectivity, GFX status) to support teams.
+
+### 7.2 Scalability & Capacity Targets
+- Handle **100+ concurrent live matches** globally with consistent sub-500ms scorer-to-GFX latency.
+- Support **500–1,000 concurrent scorer clients** and GFX browser inputs without degraded performance.
+- Design APIs and data models to scale to **millions of deliveries per month** without manual partitioning.
+
+### 7.3 Reliability & Observability
+- Implement structured logging and tracing for every ball event (request ID, match ID, tenant ID, scorer ID).
+- Add metrics for WebSocket connection counts, reconnect rates, and per-match update latency (p50/p90/p99).
+- Define alerting rules for stalled matches (no events > X minutes), high error rates, or degraded cache/database performance.
+
+### 7.4 Security, Compliance & Governance
+- Enforce RBAC and per-tenant scoping for all scorer and admin actions.
+- Provide audit logs for critical changes (score edits, match result overrides, tournament configuration).
+- Harden public endpoints with WAF/rate limiting and implement secure key rotation for data feed tokens.
+
+## 8. Out of Scope for MVP (Future Roadmap)
 
 - Automated Hawk-Eye or ball-tracking camera integration.

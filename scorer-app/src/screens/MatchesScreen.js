@@ -38,7 +38,8 @@ export default function MatchesScreen({ route, navigation }) {
 
   const handleMatchSelect = async (match) => {
     await loadMatchState(match.id);
-    if (match.status === 'UPCOMING') {
+    // If toss decisions haven't been made or match isn't officially started, always go to setup first.
+    if (match.status === 'UPCOMING' || match.status === 'TOSS') {
       navigation.navigate('PreMatchSetup', { matchId: match.id });
     } else {
       navigation.navigate('ScoringDashboard');
