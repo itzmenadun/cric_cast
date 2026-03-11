@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import Toast from 'react-native-toast-message';
+import { TamaguiProvider, Theme } from 'tamagui';
+import tamaguiConfig from './tamagui.config';
 
 // Context
 import { MatchProvider } from './src/context/MatchContext';
@@ -36,9 +38,11 @@ const NAV_HEADER_STYLE = {
 export default function App() {
   return (
     <>
-      <MatchProvider>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="Dashboard" screenOptions={NAV_HEADER_STYLE}>
+      <TamaguiProvider config={tamaguiConfig}>
+        <Theme name="light">
+          <MatchProvider>
+            <NavigationContainer>
+              <Stack.Navigator initialRouteName="Dashboard" screenOptions={NAV_HEADER_STYLE}>
 
             {/* ── Home ── */}
             <Stack.Screen
@@ -112,16 +116,18 @@ export default function App() {
               component={EditMatchScreen}
               options={{ title: 'Edit Match' }}
             />
-            <Stack.Screen
-              name="TeamsList"
-              component={TeamsListScreen}
-              options={{ title: 'All Teams' }}
-            />
+                <Stack.Screen
+                  name="TeamsList"
+                  component={TeamsListScreen}
+                  options={{ title: 'All Teams' }}
+                />
 
-          </Stack.Navigator>
-          <StatusBar style="light" />
-        </NavigationContainer>
-      </MatchProvider>
+              </Stack.Navigator>
+              <StatusBar style="light" />
+            </NavigationContainer>
+          </MatchProvider>
+        </Theme>
+      </TamaguiProvider>
       <Toast />
     </>
   );

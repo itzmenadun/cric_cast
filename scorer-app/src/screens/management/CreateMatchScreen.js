@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { View, TextInput, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { api } from '../../services/api';
+import { YStack, Paragraph, Text, Button, Theme, Card } from 'tamagui';
 
 export default function CreateMatchScreen({ navigation }) {
   const [tournaments, setTournaments] = useState([]);
@@ -50,89 +51,177 @@ export default function CreateMatchScreen({ navigation }) {
     }
   };
 
-  if (loading) return <View style={styles.centered}><ActivityIndicator size="large" color="#005EB8" /></View>;
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#005EB8" />
+      </View>
+    );
+  }
 
   const SelectorGroup = ({ label, items, selected, onSelect, exclude }) => (
-    <View>
-      <Text style={styles.label}>{label} *</Text>
+    <YStack mt="$3">
+      <Paragraph size="$2" fontWeight="600" color="$text">
+        {label} <Text style={{ color: '#EF4444' }}>*</Text>
+      </Paragraph>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
-        {items.filter(i => !exclude || i.id !== exclude?.id).map(item => (
-          <TouchableOpacity
-            key={item.id}
-            style={[styles.selectorChip, selected?.id === item.id && styles.selectorChipActive]}
-            onPress={() => onSelect(item)}
-          >
-            {item.color && <View style={[styles.colorDot, { backgroundColor: item.color }]} />}
-            <Text style={[styles.selectorText, selected?.id === item.id && styles.selectorTextActive]}>
-              {item.shortName || item.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {items
+          .filter(i => !exclude || i.id !== exclude?.id)
+          .map(item => {
+            const isActive = selected?.id === item.id;
+            return (
+              <Button
+                key={item.id}
+                size="$3"
+                mr="$2"
+                chromeless={!isActive}
+                backgroundColor={isActive ? '$primary' : '$bgCard'}
+                borderColor={isActive ? '$primary' : '#CBD5E1'}
+                borderWidth={1.5}
+                br="$xl"
+                onPress={() => onSelect(item)}
+              >
+                <Text style={[styles.selectorText, isActive && styles.selectorTextActive]}>
+                  {item.shortName || item.name}
+                </Text>
+              </Button>
+            );
+          })}
       </ScrollView>
-    </View>
+    </YStack>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll}>
+    <Theme name="light">
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <YStack space="$3">
+            <SelectorGroup
+              label="Tournament"
+              items={tournaments}
+              selected={selectedTournament}
+              onSelect={setTournament}
+            />
 
-        <SelectorGroup label="Tournament" items={tournaments} selected={selectedTournament} onSelect={setTournament} />
-
-        {selectedTournament && (
-          <View style={styles.tournamentInfo}>
-            <Text style={styles.infoText}>📋 {selectedTournament.format} · {selectedTournament.oversPerInnings} overs</Text>
-          </View>
-        )}
-
-        <SelectorGroup label="Home Team" items={teams} selected={homeTeam} onSelect={setHomeTeam} exclude={awayTeam} />
-        <SelectorGroup label="Away Team" items={teams} selected={awayTeam} onSelect={setAwayTeam} exclude={homeTeam} />
-
-        {homeTeam && awayTeam && (
-          <View style={styles.matchPreview}>
-            <Text style={styles.matchPreviewText}>{homeTeam.shortName}  vs  {awayTeam.shortName}</Text>
-          </View>
-        )}
-
-        <Text style={styles.label}>Venue</Text>
-        <TextInput style={styles.input} placeholder="e.g. R. Premadasa Stadium, Colombo" placeholderTextColor="#94A3B8" value={venue} onChangeText={setVenue} />
-
-        <Text style={styles.label}>Match Date</Text>
-        {Platform.OS === 'web' ? (
-          <input
-            type="date"
-            style={{ width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '15px' }}
-            value={matchDate ? matchDate.toISOString().split('T')[0] : ''}
-            onChange={(e) => setMatchDate(e.target.value ? new Date(e.target.value) : null)}
-          />
-        ) : (
-          <>
-            <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-              <Text style={{ color: matchDate ? '#1E293B' : '#94A3B8' }}>
-                {matchDate ? matchDate.toISOString().split('T')[0] : 'Select Date'}
-              </Text>
-            </TouchableOpacity>
-            {showDatePicker && (
-              <DateTimePicker
-                value={matchDate || new Date()}
-                mode="date"
-                display="default"
-                onChange={(event, date) => {
-                  setShowDatePicker(false);
-                  if (date) setMatchDate(date);
-                }}
-              />
+            {selectedTournament && (
+              <Card bordered br="$md" padding="$3" backgroundColor="$primarySoft">
+                <Paragraph size="$2" color="$primary">
+                  📋 {selectedTournament.format} · {selectedTournament.oversPerInnings} overs
+                </Paragraph>
+              </Card>
             )}
-          </>
-        )}
 
-      </ScrollView>
+            <SelectorGroup
+              label="Home Team"
+              items={teams}
+              selected={homeTeam}
+              onSelect={setHomeTeam}
+              exclude={awayTeam}
+            />
+            <SelectorGroup
+              label="Away Team"
+              items={teams}
+              selected={awayTeam}
+              onSelect={setAwayTeam}
+              exclude={homeTeam}
+            />
 
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.submitBtn} onPress={submit} disabled={saving}>
-          {saving ? <ActivityIndicator color="#FFF" /> : <Text style={styles.submitText}>Create Match →</Text>}
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+            {homeTeam && awayTeam && (
+              <Card br="$lg" padding="$3" backgroundColor="#1E293B">
+                <Paragraph
+                  size="$3"
+                  color="$white"
+                  fontWeight="900"
+                  textAlign="center"
+                  letterSpacing={2}
+                >
+                  {homeTeam.shortName}  vs  {awayTeam.shortName}
+                </Paragraph>
+              </Card>
+            )}
+
+            <YStack mt="$3">
+              <Paragraph size="$2" fontWeight="600" color="$text" mb="$1">
+                Venue
+              </Paragraph>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. R. Premadasa Stadium, Colombo"
+                placeholderTextColor="#94A3B8"
+                value={venue}
+                onChangeText={setVenue}
+              />
+            </YStack>
+
+            <YStack mt="$3">
+              <Paragraph size="$2" fontWeight="600" color="$text" mb="$1">
+                Match Date
+              </Paragraph>
+              {Platform.OS === 'web' ? (
+                <input
+                  type="date"
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: '10px',
+                    border: '1px solid #E2E8F0',
+                    fontSize: '15px',
+                  }}
+                  value={matchDate ? matchDate.toISOString().split('T')[0] : ''}
+                  onChange={(e) =>
+                    setMatchDate(e.target.value ? new Date(e.target.value) : null)
+                  }
+                />
+              ) : (
+                <>
+                  <Button
+                    size="$3"
+                    br="$md"
+                    backgroundColor="$bgCard"
+                    borderColor="#CBD5E1"
+                    borderWidth={1}
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <Text style={{ color: matchDate ? '#1E293B' : '#94A3B8' }}>
+                      {matchDate
+                        ? matchDate.toISOString().split('T')[0]
+                        : 'Select Date'}
+                    </Text>
+                  </Button>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={matchDate || new Date()}
+                      mode="date"
+                      display="default"
+                      onChange={(event, date) => {
+                        setShowDatePicker(false);
+                        if (date) setMatchDate(date);
+                      }}
+                    />
+                  )}
+                </>
+              )}
+            </YStack>
+          </YStack>
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <Button
+            size="$4"
+            br="$md"
+            backgroundColor="#DC2626"
+            onPress={submit}
+            disabled={saving}
+          >
+            {saving ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.submitText}>Create Match →</Text>
+            )}
+          </Button>
+        </View>
+      </SafeAreaView>
+    </Theme>
   );
 }
 
