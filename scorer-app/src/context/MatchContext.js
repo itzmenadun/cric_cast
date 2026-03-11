@@ -7,16 +7,17 @@ const MatchContext = createContext();
 export const useMatch = () => useContext(MatchContext);
 
 export const MatchProvider = ({ children }) => {
-  const [matchId, setMatchId] = useState(null);
+  const [matchId, setMatchId]       = useState(null);
   const [matchState, setMatchState] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [inningsId, setInningsId]   = useState(null);
+  const [currentOverId, setCurrentOverId] = useState(null);
+  const [currentBallNumber, setCurrentBallNumber] = useState(1);
+  const [isLoading, setIsLoading]   = useState(false);
+  const [error, setError]           = useState(null);
 
   // Background queue flusher (runs every 10 seconds)
   useEffect(() => {
-    const interval = setInterval(() => {
-      SyncQueue.flush();
-    }, 10000);
+    const interval = setInterval(() => { SyncQueue.flush(); }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -25,10 +26,21 @@ export const MatchProvider = ({ children }) => {
     try {
       setIsLoading(true);
       setError(null);
-      // Fetch full details of the match from our REST DB endpoint
       const response = await api.get(`/api/matches/${id}`);
-      setMatchState(response.data);
+      const data = response.data;
+      setMatchState(data);
       setMatchId(id);
+
+      // Automatically extract current innings and over state
+      const liveInnings = data.innings?.find(inn => inn.status === 'IN_PROGRESS');
+      if (liveInnings) {
+        setInningsId(liveInnings.id);
+        const lastOver = liveInnings.overs?.[liveInnings.overs.length - 1];
+        if (lastOver) {
+          setCurrentOverId(lastOver.id);
+          setCurrentBallNumber((lastOver.balls?.length || 0) + 1);
+        }
+      }
     } catch (err) {
       console.error('Failed to load match state:', err);
       setError(err.message);
@@ -37,26 +49,26 @@ export const MatchProvider = ({ children }) => {
     }
   }, []);
 
-  // Expose the core scoring action function so any component can safely submit a ball
   const submitDelivery = async (ballData) => {
     try {
-      // Optimistically update some UI (optional MVP logic)
-      // Here we just attempt the post immediately
-      await api.post('/api/scoring/ball', ballData);
-      // If success, reload the state heavily to reflect the entire DB update
+      await api.post('/api/scoring/ball', {
+        ...ballData,
+        inningsId,
+        overId: currentOverId,
+        ballNumber: currentBallNumber,
+      });
       await loadMatchState(matchId);
     } catch (err) {
       console.warn('Network failed or offline. Queueing action locally.', err.message);
-      // Offline fallback: Queue it for the flusher
-      await SyncQueue.enqueue('/api/scoring/ball', ballData);
-      
-      // We could optimistically mutate `matchState` here for an instantaneous offline feel, 
-      // but to keep the MVP stable, we alert the user
+      await SyncQueue.enqueue('/api/scoring/ball', {
+        ...ballData, inningsId, overId: currentOverId, ballNumber: currentBallNumber,
+      });
       alert('Network unstable. Ball queued for background sync.');
     }
   };
 
-  const undoLastDelivery = async (inningsId) => {
+  const undoLastDelivery = async () => {
+    if (!inningsId) { alert('Cannot undo — no active innings found.'); return; }
     try {
       await api.post('/api/scoring/undo', { inningsId });
       await loadMatchState(matchId);
@@ -65,16 +77,49 @@ export const MatchProvider = ({ children }) => {
     }
   };
 
+  // Called at the start of each new over to set the bowler
+  const startBowlerOver = async (bowlerId) => {
+    if (!inningsId) return;
+    try {
+      const { data } = await api.post(`/api/innings/${inningsId}/start-over`, { bowlerId });
+      setCurrentOverId(data.overId);
+      setCurrentBallNumber(1);
+      await loadMatchState(matchId);
+    } catch (err) {
+      alert('Failed to start new over.');
+    }
+  };
+
+  // Called when 1st innings ends to create 2nd innings
+  const startSecondInnings = async ({ battingTeamId, bowlingTeamId, target }) => {
+    try {
+      await api.post(`/api/matches/${matchId}/start-innings`, {
+        battingTeamId,
+        bowlingTeamId,
+        inningsNumber: 2,
+        target,
+      });
+      await loadMatchState(matchId);
+    } catch (err) {
+      alert('Failed to start 2nd innings.');
+    }
+  };
+
   return (
-    <MatchContext.Provider 
-      value={{ 
-        matchId, 
-        matchState, 
-        isLoading, 
-        error, 
+    <MatchContext.Provider
+      value={{
+        matchId,
+        matchState,
+        inningsId,
+        currentOverId,
+        currentBallNumber,
+        isLoading,
+        error,
         loadMatchState,
         submitDelivery,
-        undoLastDelivery
+        undoLastDelivery,
+        startBowlerOver,
+        startSecondInnings,
       }}
     >
       {children}

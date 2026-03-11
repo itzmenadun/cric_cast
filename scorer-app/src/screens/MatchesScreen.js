@@ -1,26 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, SafeAreaView } from 'react-native';
-import { api } from '../services/api';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { api, apiWithRetry } from '../services/api';
 import { Calendar, Users } from 'lucide-react-native';
 import { useMatch } from '../context/MatchContext';
+import ErrorBanner from '../components/ErrorBanner';
 
 export default function MatchesScreen({ route, navigation }) {
   const { tournamentId, tournamentName } = route.params;
   const { loadMatchState } = useMatch();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    navigation.setOptions({ title: tournamentName });
+    navigation.setOptions({
+      title: tournamentName,
+      headerRight: () => (
+        <TouchableOpacity onPress={() => navigation.navigate('CreateMatch')} style={{ marginRight: 8 }}>
+          <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 15 }}>+ Match</Text>
+        </TouchableOpacity>
+      ),
+    });
     loadMatches();
   }, []);
 
   const loadMatches = async () => {
     try {
-      const { data } = await api.get(`/api/matches?tournamentId=${tournamentId}`);
+      setError(null);
+      const { data } = await apiWithRetry(() => api.get(`/api/matches?tournamentId=${tournamentId}`));
       setMatches(data);
     } catch (e) {
-      console.error(e);
+      setError('Could not load matches. Check your connection.');
     } finally {
       setLoading(false);
     }
@@ -35,10 +45,26 @@ export default function MatchesScreen({ route, navigation }) {
     }
   };
 
+  const deleteMatch = (item) => {
+    Alert.alert('Delete Match', `Delete ${item.homeTeam?.name || '?'} vs ${item.awayTeam?.name || '?'}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try { await api.delete(`/api/matches/${item.id}`); loadMatches(); }
+        catch { Alert.alert('Error', 'Failed to delete match.'); }
+      }},
+    ]);
+  };
+
   const renderItem = ({ item }) => {
-    const isLive = item.status === 'LIVE';
     return (
-      <TouchableOpacity style={styles.card} onPress={() => handleMatchSelect(item)}>
+      <TouchableOpacity style={styles.card} onPress={() => handleMatchSelect(item)}
+        onLongPress={() => {
+          Alert.alert(`${item.homeTeam?.name || '?'} vs ${item.awayTeam?.name || '?'}`, 'Choose action', [
+            { text: 'Edit', onPress: () => navigation.navigate('EditMatch', { matchId: item.id }) },
+            { text: 'Delete', style: 'destructive', onPress: () => deleteMatch(item) },
+            { text: 'Cancel', style: 'cancel' },
+          ]);
+        }}>
         <View style={styles.headerRow}>
           <Text style={styles.status(item.status)}>{item.status.replace('_', ' ')}</Text>
           <Text style={styles.date}>{new Date(item.matchDate).toLocaleDateString()}</Text>
@@ -46,13 +72,13 @@ export default function MatchesScreen({ route, navigation }) {
         
         <View style={styles.teamsRow}>
           <View style={styles.team}>
-            <View style={[styles.colorDot, { backgroundColor: item.homeTeam.color }]} />
-            <Text style={styles.teamName}>{item.homeTeam.name}</Text>
+            <View style={[styles.colorDot, { backgroundColor: item.homeTeam?.color || '#CBD5E1' }]} />
+            <Text style={styles.teamName}>{item.homeTeam?.name || '?'}</Text>
           </View>
           <Text style={styles.vs}>vs</Text>
           <View style={styles.team}>
-            <Text style={styles.teamName}>{item.awayTeam.name}</Text>
-            <View style={[styles.colorDot, { backgroundColor: item.awayTeam.color }]} />
+            <Text style={styles.teamName}>{item.awayTeam?.name || '?'}</Text>
+            <View style={[styles.colorDot, { backgroundColor: item.awayTeam?.color || '#CBD5E1' }]} />
           </View>
         </View>
         
@@ -63,6 +89,7 @@ export default function MatchesScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ErrorBanner message={error} onRetry={loadMatches} visible={!!error} />
       {loading ? (
         <ActivityIndicator size="large" color="#005EB8" style={styles.loader} />
       ) : (

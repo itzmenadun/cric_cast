@@ -6,8 +6,9 @@ export default function MilestonePopup({ command, onComplete }) {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    if (!command || !command.duration) return;
-    const timer = setTimeout(() => setIsVisible(false), command.duration);
+    if (!command) return;
+    const duration = command.duration || 8000;
+    const timer = setTimeout(() => setIsVisible(false), duration);
     return () => clearTimeout(timer);
   }, [command]);
 

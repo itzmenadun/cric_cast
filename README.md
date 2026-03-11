@@ -28,6 +28,24 @@ The ecosystem consists of three interconnected services, all communicating seaml
 
 Ensure you have Node.js (v20+), Docker, and Expo CLI installed on your machine.
 
+### Quick Start: Launching the Entire Ecosystem
+To run the full project locally, you will need to open three separate terminal windows from the root `cric_cast` directory:
+
+1. **Terminal 1 (Backend - Docker):**
+   ```bash
+   cd backend && docker-compose up -d --build
+   ```
+2. **Terminal 2 (GFX Broadcast Engine):**
+   ```bash
+   cd gfx-engine && npm install && npm run dev
+   ```
+3. **Terminal 3 (Scorer App):**
+   ```bash
+   cd scorer-app && npm install && npx expo start
+   ```
+
+---
+
 ### 1. The Backend
 The backend utilizes Docker Compose to spin up the Node API, a PostgreSQL database, and a Redis cache identically in development and production.
 

@@ -7,15 +7,20 @@ export default function BattingScorecard({ command, onComplete }) {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    if (!command || !command.duration) return;
-    const timer = setTimeout(() => setIsVisible(false), command.duration);
+    if (!command) return;
+    const duration = command.duration || 15000;
+    const timer = setTimeout(() => setIsVisible(false), duration);
     return () => clearTimeout(timer);
   }, [command]);
 
   const handleExitComplete = () => onComplete(command.id);
 
   if (!command?.data) return null;
-  const { team, batsmen, extras, overs, wickets, total } = command.data;
+  const { team = {}, batsmen = [], extras = 0, overs = 0, wickets = 0, total = 0 } = command.data;
+  const numericOvers = Number(overs) || 0;
+  const numericWickets = Number(wickets) || 0;
+  const numericTotal = Number(total) || 0;
+  const numericExtras = Number(extras) || 0;
 
   // Stagger animation for batsman rows
   const containerVariants = {
@@ -56,10 +61,10 @@ export default function BattingScorecard({ command, onComplete }) {
               <div className="flex-1 flex justify-between items-center px-10">
                 <span className="text-white font-bold text-5xl uppercase tracking-widest">Batting Card</span>
                 <div className="flex items-baseline font-mono font-bold">
-                  <AnimatedNumber value={total} className="text-7xl text-white drop-shadow-md" />
+                  <AnimatedNumber value={numericTotal} className="text-7xl text-white drop-shadow-md" />
                   <span className="text-5xl text-gray-400 mx-2">/</span>
-                  <AnimatedNumber value={wickets} className="text-6xl text-cricket-yellow drop-shadow-md" />
-                  <span className="text-2xl text-gray-500 font-sans ml-4 italic">({Math.floor(overs)}.{Math.round((overs % 1) * 10)} ov)</span>
+                  <AnimatedNumber value={numericWickets} className="text-6xl text-cricket-yellow drop-shadow-md" />
+                  <span className="text-2xl text-gray-500 font-sans ml-4 italic">({Math.floor(numericOvers)}.{Math.round((numericOvers % 1) * 10)} ov)</span>
                 </div>
               </div>
             </div>
@@ -82,9 +87,9 @@ export default function BattingScorecard({ command, onComplete }) {
                   variants={itemVariants}
                   className={`flex py-3 px-4 items-center ${idx % 2 === 0 ? 'bg-black/20' : ''}`}
                 >
-                  <div className="w-[50%] flex items-center">
-                    <span className="text-white font-bold text-2xl truncate mr-2">{bat.name}</span>
-                    <span className="text-cricket-yellow text-2xl leading-none">{bat.status === 'BATTING' ? '*' : ''}</span>
+                  <div className="w-[50%] flex items-center min-w-0 pr-4">
+                    <span className="text-white font-bold text-2xl truncate mr-2 flex-1">{bat.name || 'Unknown'}</span>
+                    <span className="text-cricket-yellow text-2xl leading-none flex-shrink-0">{bat.status === 'BATTING' ? '*' : ''}</span>
                   </div>
                   <div className="w-[30%] text-gray-400 text-sm font-medium italic truncate pr-4 text-center">
                     {bat.status === 'OUT' ? bat.dismissalString : (bat.status === 'BATTING' ? 'not out' : 'yet to bat')}
@@ -100,7 +105,7 @@ export default function BattingScorecard({ command, onComplete }) {
             {/* Footer: Extras */}
             <div className="flex bg-cricket-panel h-[60px] px-10 items-center justify-between border-t border-gray-700">
               <span className="text-gray-400 uppercase font-bold tracking-widest text-lg">Extras</span>
-              <span className="text-white font-mono font-bold text-2xl">{extras}</span>
+              <span className="text-white font-mono font-bold text-2xl">{numericExtras}</span>
             </div>
 
           </div>

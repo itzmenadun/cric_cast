@@ -44,3 +44,35 @@ Based on the PRD, Design Documentation, and Tech Stack, this is the 12-week road
 - [x] Deploy GFX App to Vercel/Cloudflare Pages.
 - [x] Final UI/UX review of animations, safe areas, and typography.
 - [x] Production Launch.
+
+---
+
+## Phase 6: Scorer App v2.0 — Full Management Suite (Weeks 13-15)
+
+### 6.1 Dashboard & Navigation
+- [x] Replace single-stack with a Home Dashboard screen as the default landing page.
+- [x] Add quick-action buttons on Dashboard for: New Tournament, New Team, New Match.
+- [x] Show Live, Upcoming, and recent Tournament cards on the home screen.
+- [x] Register all new management screens in `App.js` navigation stack.
+
+### 6.2 Entity Management Screens
+- [x] **CreateTournamentScreen** — Form with format (T10/T20/ODI/TEST), overs, and date range.
+- [x] **CreateTeamScreen** — Team name, short name, color picker (8 presets) with live badge preview.
+- [x] **AddPlayerScreen** — Add players to a team by role (Batsman/Bowler/All-Rounder/WK) and jersey number; displays current roster.
+- [x] **CreateMatchScreen** — Select tournament, home/away teams, venue, and date with live "vs" preview.
+
+### 6.3 Live Scoring Enhancements
+- [x] **WicketModal** — Bottom sheet for wicket type (8 types), dismissed batsman disambiguation, and fielder/WK selection.
+- [x] **BowlerChangeModal** — Shown after every 6 legal balls; lists eligible bowlers (filters out previous over's bowler).
+- [x] **Current over ball tracker** — Visual row of colored dots (·/1/2/4/6/W/WD/NB) in the scorebug header.
+- [x] **InningsBreakScreen** — Full 1st innings batting & bowling scorecard with target banner; "Start 2nd Innings" button.
+- [x] **MatchSummaryScreen** — Full dual-innings scorecard with winner calculation (runs difference or wickets remaining).
+- [x] Fix `undoLastDelivery` to use the real `inningsId` from `MatchContext` instead of a hardcoded UUID.
+- [x] Auto-navigate to InningsBreak when all wickets fall or overs complete.
+- [x] Auto-navigate to MatchSummary when 2nd innings ends.
+
+### 6.4 MatchContext Updates
+- [x] Persist `inningsId`, `currentOverId`, `currentBallNumber` in context — extracted from live match state on load.
+- [x] Added `startBowlerOver(bowlerId)` — calls backend to open a new over row, updates `currentOverId`.
+- [x] Added `startSecondInnings({ battingTeamId, bowlingTeamId, target })` — called from InningsBreakScreen.
+
