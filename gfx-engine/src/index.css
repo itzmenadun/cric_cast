@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    /* Critical for vMix/OBS alpha channel support */
+    background-color: transparent !important;
+    overflow: hidden; /* Prevent scrollbars from appearing on broadcast */
+    margin: 0;
+    padding: 0;
+    /* Optional: Force 1920x1080 if running in a windowed setup */
+    width: 1920px;
+    height: 1080px;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Text shadowing for readability on varied backgrounds */
+  .text-shadow-sm {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  }
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  }
+}
