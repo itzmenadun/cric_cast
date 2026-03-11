@@ -4,21 +4,21 @@ Based on the PRD, Design Documentation, and Tech Stack, this is the 12-week road
 
 ## Phase 1: Foundation, Infrastructure & Backend (Weeks 1-3)
 - [ ] Set up cloud infrastructure (Render/Railway or AWS).
-- [/] Initialize PostgreSQL database and design schema (Tournaments, Matches, Innings, Overs, Balls, Players).
+- [x] Initialize PostgreSQL database and design schema (Tournaments, Matches, Innings, Overs, Balls, Players).
 - [x] Setup Redis for in-memory live match state caching.
 - [x] Initialize Node.js + Fastify backend.
-- [ ] Implement robust REST API for pre-match setup (Tournament & Match creation, Team/Roster management via CSV import).
-- [ ] Implement Socket.io server for low-latency WebSocket connections with fallback to HTTP long-polling.
-- [ ] Configure Idempotent API design to handle duplicate requests gracefully.
+- [x] Implement robust REST API for pre-match setup (Tournament & Match creation, Team/Roster management via CSV import).
+- [x] Implement Socket.io server for low-latency WebSocket connections with fallback to HTTP long-polling.
+- [x] Configure Idempotent API design to handle duplicate requests gracefully.
 
 ## Phase 2: Scorer's Interface MVP (React Native) (Weeks 4-6)
 - [x] Initialize React Native (Expo) project for iOS/Android tablets and phones.
-- [ ] Build Pre-Match Setup UI (Toss, Lineup selection).
-- [ ] Develop the Live Scoring Engine dashboard.
-- [ ] Implement one-click ball entry functionality (Runs, Extras, Wickets).
-- [ ] Build match state management logic (CRR, RRR, DLS par scores).
-- [ ] Integrate offline-first architecture using `WatermelonDB` or `AsyncStorage` for seamless offline/online syncing.
-- [ ] Add Undo/Edit functionality for live corrections.
+- [x] Build Pre-Match Setup UI (Toss, Lineup selection).
+- [x] Develop the Live Scoring Engine dashboard.
+- [x] Implement one-click ball entry functionality (Runs, Extras, Wickets).
+- [x] Build match state management logic (CRR, RRR, DLS par scores).
+- [x] Integrate offline-first architecture using `WatermelonDB` or `AsyncStorage` for seamless offline/online syncing.
+- [x] Add Undo/Edit functionality for live corrections.
 
 ## Phase 3: GFX Rendering Engine Core (React.js) (Weeks 7-9)
 - [x] Initialize React.js (Vite) project tailored for a 1920x1080 transparent canvas.

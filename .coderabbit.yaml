@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://coderabbit.ai/export/schema.json
+language: "en-US"
+reviews:
+  profile: "software_engineer"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: true
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "Draft"
+  path_instructions:
+    - path: "**/*.js"
+      instructions: "Ensure code follows ECMAScript 2022 standards. Use functional React components with hooks. Check for proper error handling and async/await usage."
+    - path: "backend/**/*.js"
+      instructions: "Verify Fastify route definitions and Prisma ORM usage. Ensure API endpoints handle inputs securely and return appropriate HTTP status codes."
+    - path: "scorer-app/**/*.js"
+      instructions: "Check React Native components for performance. Ensure offline syncing logic via AsyncStorage is robust and handles UI state smoothly."
+    - path: "gfx-app/**/*.js"
+      instructions: "Verify React Vite components and Framer Motion animations. Ensure WebSocket connections are handled properly without memory leaks."
+
+chat:
+  auto_reply: true
