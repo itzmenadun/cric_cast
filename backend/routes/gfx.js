@@ -1,7 +1,6 @@
-const { PrismaClient } = require('@prisma/client')
 const { getMatchState } = require('../services/matchState')
 
-const prisma = new PrismaClient()
+const prisma = require('../db')
 
 async function gfxRoutes(fastify) {
   // Live match state for GFX engine (from Redis cache)

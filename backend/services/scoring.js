@@ -1,9 +1,8 @@
-const { PrismaClient } = require('@prisma/client')
 const { setMatchState, buildMatchState } = require('./matchState')
 const { broadcastMatchUpdate, broadcastGfxCommand } = require('./socketManager')
 const crypto = require('crypto')
 
-const prisma = new PrismaClient()
+const prisma = require('../db')
 
 /**
  * Process a ball delivery with full stat updates and idempotency.

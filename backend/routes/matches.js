@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client')
-const prisma = new PrismaClient()
+const prisma = require('../db')
 
 async function matchRoutes(fastify) {
   // List all matches (optionally filtered by tournament)

@@ -1,7 +1,6 @@
-const { PrismaClient } = require('@prisma/client')
 const { processBall, undoLastBall } = require('../services/scoring')
 
-const prisma = new PrismaClient()
+const prisma = require('../db')
 
 async function scoringRoutes(fastify) {
   // Record a ball delivery

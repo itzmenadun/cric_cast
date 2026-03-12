@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { api, apiWithRetry } from '../services/api';
+import { Calendar, Users } from 'lucide-react-native';
 import { useMatch } from '../context/MatchContext';
 import ErrorBanner from '../components/ErrorBanner';
-import { YStack, XStack, ScrollView, Card, Paragraph, Text, Button, Spinner, Theme } from 'tamagui';
 
 export default function MatchesScreen({ route, navigation }) {
   const { tournamentId, tournamentName } = route.params;
@@ -56,105 +56,89 @@ export default function MatchesScreen({ route, navigation }) {
     ]);
   };
 
-  const renderItem = (item) => {
-    const status = item.status;
-    const isLive = status === 'LIVE';
-    const isCompleted = status === 'COMPLETED';
-    const statusLabel = status.replace('_', ' ');
-
+  const renderItem = ({ item }) => {
     return (
-      <Card
-        key={item.id}
-        elevate
-        bordered
-        br="$md"
-        mb="$3"
-        padding="$3"
-        backgroundColor="$bgCard"
-        pressStyle={{ scale: 0.98 }}
-        onPress={() => handleMatchSelect(item)}
+      <TouchableOpacity style={styles.card} onPress={() => handleMatchSelect(item)}
         onLongPress={() => {
           Alert.alert(`${item.homeTeam?.name || '?'} vs ${item.awayTeam?.name || '?'}`, 'Choose action', [
             { text: 'Edit', onPress: () => navigation.navigate('EditMatch', { matchId: item.id }) },
             { text: 'Delete', style: 'destructive', onPress: () => deleteMatch(item) },
             { text: 'Cancel', style: 'cancel' },
           ]);
-        }}
-      >
-        <XStack jc="space-between" ai="center" mb="$2">
-          <Paragraph
-            size="$1"
-            fontWeight="700"
-            px="$2"
-            py="$1"
-            br="$xs"
-            backgroundColor={
-              isLive ? '$danger' : isCompleted ? '$primarySoft' : '$primarySoft'
-            }
-            color={isLive ? '$white' : '$primary'}
-          >
-            {statusLabel}
-          </Paragraph>
-          <Paragraph size="$1" color="$textMuted">
-            {item.matchDate ? new Date(item.matchDate).toLocaleDateString() : 'TBA'}
-          </Paragraph>
-        </XStack>
-
-        <XStack jc="space-between" ai="center" mb="$3">
-          <XStack ai="center" space="$2" flex={1}>
-            <YStack
-              width={14}
-              height={14}
-              br={999}
-              backgroundColor={item.homeTeam?.color || '$slate300'}
-            />
-            <Paragraph size="$3" fontWeight="700" color="$text">
-              {item.homeTeam?.name || '?'}
-            </Paragraph>
-          </XStack>
-          <Paragraph size="$2" color="$textMuted">
-            vs
-          </Paragraph>
-          <XStack ai="center" space="$2" flex={1} jc="flex-end">
-            <Paragraph size="$3" fontWeight="700" color="$text">
-              {item.awayTeam?.name || '?'}
-            </Paragraph>
-            <YStack
-              width={14}
-              height={14}
-              br={999}
-              backgroundColor={item.awayTeam?.color || '$slate300'}
-            />
-          </XStack>
-        </XStack>
-
-        <Paragraph size="$2" color="$textMuted" ta="center">
-          {item.venue || 'Venue TBA'}
-        </Paragraph>
-      </Card>
+        }}>
+        <View style={styles.headerRow}>
+          <Text style={styles.status(item.status)}>{item.status.replace('_', ' ')}</Text>
+          <Text style={styles.date}>{new Date(item.matchDate).toLocaleDateString()}</Text>
+        </View>
+        
+        <View style={styles.teamsRow}>
+          <View style={styles.team}>
+            <View style={[styles.colorDot, { backgroundColor: item.homeTeam?.color || '#CBD5E1' }]} />
+            <Text style={styles.teamName}>{item.homeTeam?.name || '?'}</Text>
+          </View>
+          <Text style={styles.vs}>vs</Text>
+          <View style={styles.team}>
+            <Text style={styles.teamName}>{item.awayTeam?.name || '?'}</Text>
+            <View style={[styles.colorDot, { backgroundColor: item.awayTeam?.color || '#CBD5E1' }]} />
+          </View>
+        </View>
+        
+        <Text style={styles.venue}>{item.venue || 'TBA'}</Text>
+      </TouchableOpacity>
     );
   };
 
   return (
-    <Theme name="light">
-      <YStack f={1} bg="$bg" pt="$3">
-        <ErrorBanner message={error} onRetry={loadMatches} visible={!!error} />
-        {loading ? (
-          <YStack f={1} jc="center" ai="center">
-            <Spinner size="large" color="$primary" />
-          </YStack>
-        ) : (
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}>
-            {matches.length === 0 ? (
-              <YStack f={1} jc="center" ai="center" mt="$6">
-                <Text color="$textMuted">No matches scheduled.</Text>
-              </YStack>
-            ) : (
-              matches.map(renderItem)
-            )}
-          </ScrollView>
-        )}
-      </YStack>
-    </Theme>
+    <SafeAreaView style={styles.container}>
+      <ErrorBanner message={error} onRetry={loadMatches} visible={!!error} />
+      {loading ? (
+        <ActivityIndicator size="large" color="#005EB8" style={styles.loader} />
+      ) : (
+        <FlatList
+          data={matches}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={<Text style={styles.empty}>No matches scheduled.</Text>}
+        />
+      )}
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#F1F5F9' },
+  loader: { marginTop: 50 },
+  list: { padding: 16 },
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: '#CBD5E1'
+  },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+  status: (state) => ({
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: state === 'LIVE' ? '#DC2626' : (state === 'COMPLETED' ? '#16A34A' : '#64748B'),
+    backgroundColor: state === 'LIVE' ? '#FEE2E2' : (state === 'COMPLETED' ? '#DCFCE7' : '#F1F5F9'),
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    overflow: 'hidden'
+  }),
+  date: { fontSize: 12, color: '#94A3B8' },
+  teamsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  team: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  teamName: { fontSize: 16, fontWeight: '700', color: '#1E293B', marginHorizontal: 8 },
+  colorDot: { width: 12, height: 12, borderRadius: 6 },
+  vs: { fontSize: 14, color: '#94A3B8', fontWeight: '500' },
+  venue: { fontSize: 13, color: '#64748B', textAlign: 'center' },
+  empty: { textAlign: 'center', marginTop: 40, color: '#94A3B8' }
+});
