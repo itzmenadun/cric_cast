@@ -1,4 +1,5 @@
-const prisma = require('../db')
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 
 async function main() {
   console.log('🏏 Seeding CricCast database with T20 World Cup 2026 Final data...\n')
